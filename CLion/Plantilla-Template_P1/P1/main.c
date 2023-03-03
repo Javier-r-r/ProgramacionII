@@ -25,26 +25,26 @@
 void New (tParticipantName countryname, tEUParticipant euParticipant, tList *l) {
   tItemL participant;
   if (findItem(countryname, *l) != LNULL) {
-    printf("+ Error: New not possible");
+    printf("+ Error: New not possible\n");
   } else {
     strcpy(participant.participantName, countryname);
     participant.EUParticipant = euParticipant;
     participant.numVotes = 0;
     if (insertItem(participant, LNULL, l)) {
       if (participant.EUParticipant) {
-        printf("* New: participant %s location eu", participant.participantName);
+        printf("* New: participant %s location eu\n", participant.participantName);
       } else {
-        printf("* New: participant %s location non-eu", participant.participantName);
+        printf("* New: participant %s location non-eu\n", participant.participantName);
       }
     }
   }
 }
 
 void processCommand(char *commandNumber, char command, char *param1, char *param2, tList *l) {
-
+  printf("********************\n");
   switch (command) {
     case 'N':                 //realiza new
-      printf("Command: %s %c %s %s\n", commandNumber, command, param1, param2);
+      printf("%s %c %s %s\n", commandNumber, command, param1, param2);
       New(param1, param2, l);
       break;
     case 'V':                 //realiza vote
