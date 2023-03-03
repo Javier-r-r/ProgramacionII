@@ -22,17 +22,34 @@
 #endif
 
 
+void New (tParticipantName countryname, tEUParticipant euParticipant, tList *l) {
+  tItemL participant;
+  if (findItem(countryname, *l) != LNULL) {
+    printf("+ Error: New not possible");
+  } else {
+    strcpy(participant.participantName, countryname);
+    participant.EUParticipant = euParticipant;
+    participant.numVotes = 0;
+    if (insertItem(participant, LNULL, l)) {
+      if (participant.EUParticipant) {
+        printf("* New: participant %s location eu", participant.participantName);
+      } else {
+        printf("* New: participant %s location non-eu", participant.participantName);
+      }
+    }
+  }
+}
 
-
-void processCommand(char *commandNumber, char command, char *param1, char *param2) {
+void processCommand(char *commandNumber, char command, char *param1, char *param2, tList *l) {
 
   switch (command) {
-    case 'N':
+    case 'N':                 //realiza new
       printf("Command: %s %c %s %s\n", commandNumber, command, param1, param2);
+      New(param1, param2, l);
       break;
-    case 'V':
+    case 'V':                 //realiza vote
       break;
-    case 'D':
+    case 'D':                 //realiza disqualify
       break;
     case 'S':
       break;
@@ -41,7 +58,7 @@ void processCommand(char *commandNumber, char command, char *param1, char *param
     }
 }
 
-void readTasks(char *filename) {
+void readTasks(char *filename, tList *l) {
   FILE *f = NULL;
   char *commandNumber, *command, *param1, *param2;
   const char delimiters[] = " \n\r";
@@ -57,7 +74,7 @@ void readTasks(char *filename) {
       param1 = strtok(NULL, delimiters);
       param2 = strtok(NULL, delimiters);
 
-      processCommand(commandNumber, command[0], param1, param2);
+      processCommand(commandNumber, command[0], param1, param2, l);
     }
 
     fclose(f);
@@ -80,7 +97,10 @@ int main(int nargs, char **args) {
     #endif
   }
 
-  readTasks(file_name);
+  tList list;
+  createEmptyList(&list);
+
+  readTasks(file_name, &list);
 
   return 0;
 }
