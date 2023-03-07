@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "types.h"
 
 #define MAX_BUFFER 255
@@ -20,82 +21,116 @@
 #include "static_list.h"
 #endif
 
+tNumVotes nullVotes = 0;
+tNumVotes totalVotes = 0;
 
-void New (tParticipantName countryname, tEUParticipant euParticipant, tList *l) {
+void AddVote () {
+  totalVotes ++;
+}
+
+void AddNullVote () {
+  nullVotes ++;
+  AddVote();
+}
+
+void RemVotes () {
+  totalVotes --;
+}
+
+tNumVotes GetNullVotes () {
+  return nullVotes;
+}
+
+tNumVotes GetVotes () {
+  return totalVotes;
+}
+
+char *BoolToChar (tEUParticipant eu) {
+  if(eu) {
+    return "eu";
+  } else {
+    return "non-eu";
+  }
+}
+
+void New (tParticipantName countryname, char *euParticipant, tList *l) {
   tItemL participant;
   if (findItem(countryname, *l) != LNULL) {
     printf("+ Error: New not possible\n");
   } else {
     strcpy(participant.participantName, countryname);
-    participant.EUParticipant = euParticipant;
+    participant.EUParticipant = !strcmp(euParticipant, "eu"); //Pasa de char a booleano
     participant.numVotes = 0;
     if (insertItem(participant, LNULL, l)) {
-      if (participant.EUParticipant) {
-        printf("* New: participant %s location eu\n", participant.participantName);
-      } else {
-        printf("* New: participant %s location non-eu\n", participant.participantName);
-      }
+      printf("* New: participant %s location %s\n", participant.participantName, BoolToChar(participant.EUParticipant));
     } else {
       printf("+ Error: New not possible\n");
     }
   }
 }
 
-void Vote (tParticipantName participantName, tNumVotes *nullCounter, tList *l) {
+void Vote (tParticipantName participantName, tList *l) {
   tItemL participant;
   tPosL pos;
   pos = findItem(participantName, *l);
   participant = getItem(pos, *l);
   if (findItem(participantName, *l) == LNULL || isEmptyList(*l)) {
     printf("+ Error: Vote not possible. Participant %s not found. NULLVOTE\n", participant.participantName);
-    nullCounter ++;
+    AddNullVote();
   } else {
-    if (participant.EUParticipant) {
-      participant.numVotes ++;
-      printf("* Vote: participant %s location eu numvotes %d\n", participant.participantName, participant.numVotes);
-    } else {
-      participant.numVotes ++;
-      printf("* Vote: participant %s location non-eu numvotes %d\n", participant.participantName, participant.numVotes);
-    }
+    participant.numVotes ++;
+    printf("* Vote: participant %s location %s numvotes %d\n", participant.participantName, BoolToChar(participant.EUParticipant), participant.numVotes);
+    AddVote();
+    updateItem(participant, pos, l);
   }
 }
 
-/*void Disqualify (tParticipantName participant, tList *l) {
+void Disqualify (tParticipantName name, tList *l) {
+  tPosL pos = findItem(name, *l);
+  tItemL participant;
+  if (isEmptyList(*l) || pos == LNULL) {
+    printf("+ Error: Disqualify not possible\n");
+  } else {
+    participant = getItem(pos, *l);
+    printf("* Disqualify: participant %s location %s\n", participant.participantName, BoolToChar(participant.EUParticipant));
+    for (int i = 0; i < participant.numVotes; i++) {
+      AddNullVote();
+      RemVotes();
+    }
+    deleteAtPosition(pos, l);
+  }
+}
 
-}*/
-
-void Stats (tNumVotes totalVoters, tNumVotes *nullCounter, tList l) {
-  float v_n = 0,v_e;
+void Stats (char *totalVoters, tList l) {
+  float v_n;
   tPosL pos;
   tItemL item;
-  tNumVotes votes = 0;
+  tNumVotes votes = GetVotes();
+  int Voters = strtol(totalVoters, NULL, 10);
 
-  if(isEmptyList(l)) {
+  if (isEmptyList(l)) {
     printf("+ Error: Stats not possible\n");
   } else {
     pos = first(l);
     while(pos != LNULL) {
       item = getItem (pos, l);
-      if (item.EUParticipant) {
-        votes = votes + item.numVotes;
-        v_n = (float) item.numVotes/(float)votes;
-        printf("Participant %s location eu numvotes %d (%.2f%%)\n", item.participantName, item.numVotes, v_n);
+      if (item.numVotes == 0) {
+        v_n = 0;
       } else {
-        votes = votes + item.numVotes;
-        v_n = (float) item.numVotes/(float)votes;
-        printf("Participant %s location non-eu numvotes %d (%.2f%%)\n", item.participantName, item.numVotes, v_n);
+        v_n = (float) item.numVotes / (float) votes * 100;
       }
+      printf("Participant %s location %s numvotes %d (%.2f%%)\n", item.participantName, BoolToChar(item.EUParticipant), item.numVotes, v_n);
       pos = next(pos, l);
     }
-    printf("Null votes %d\n", nullCounter);
-    printf("Participation: %d votes from %s voters (%.2f%%)\n", votes, totalVoters, (float)votes/(float)totalVoters);
+    printf("Null votes %d\n", GetNullVotes());
+    float p = (float)votes/(float)Voters * 100;
+    printf("Participation: %d votes from %d voters (%.2f%%)\n", votes, Voters, p);
   }
 
 }
 
 void processCommand(char *commandNumber, char command, char *param1, char *param2, tList *l) {
   printf("********************\n");
-  tNumVotes *nullCounter = 0;
   switch (command) {
     case 'N':                 //realiza new
       printf("%s %c: participant %s location %s\n", commandNumber, command, param1, param2);
@@ -103,15 +138,15 @@ void processCommand(char *commandNumber, char command, char *param1, char *param
       break;
     case 'V':                 //realiza vote
       printf("%s %c: participant %s\n", commandNumber, command, param1);
-      Vote(param1, nullCounter, l);
+      Vote(param1, l);
       break;
     case 'D':                 //realiza disqualify
       printf("%s %c: participant %s\n", commandNumber, command, param1);
-      /*Disqualify(param1, l);*/
+      Disqualify(param1, l);
       break;
     case 'S':
       printf("%s %c: totalvoters %s\n", commandNumber, command, param1);
-      Stats(param1, nullCounter, *l);
+      Stats(param1, *l);
       break;
     default:
       break;
