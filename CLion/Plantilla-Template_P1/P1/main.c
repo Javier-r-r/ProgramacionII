@@ -22,7 +22,7 @@
 #endif
 
 char *BoolToChar (tEUParticipant eu) {  //Funcion que pasa un valor de tipo tEUParticipant a el char correspondiente
-  if(eu) {
+  if (eu) {
     return "eu";
   } else {
     return "non-eu";
@@ -38,6 +38,7 @@ void New (tParticipantName countryname, char *euParticipant, tList *l) {  //Func
     strcpy(participant.participantName, countryname);     //Se le asignan los parametros correspondientes
     participant.EUParticipant = !strcmp(euParticipant, "eu"); //Pasa de char a booleano
     participant.numVotes = 0;                             //Al crear un nuevo participante no tendra votos
+
     if (insertItem(participant, LNULL, l)) {              //Si da true al insertar el participante es que no hay errores
       printf("* New: participant %s location %s\n", participant.participantName, BoolToChar(participant.EUParticipant));    //Entonces lo inserta
     } else {                                              //Si insertItem da false
@@ -50,6 +51,7 @@ void Vote (tParticipantName participantName, int *nullVotes, int *totalVotes, tL
 
   tPosL pos;
   pos = findItem(participantName, *l);                      //Encontramos la posicion del participante en la lista
+
   if (isEmptyList(*l) || pos == LNULL) {//Si la lista esta vacia o no encuentra al participante
     printf("+ Error: Vote not possible. Participant %s not found. NULLVOTE\n", participantName);  //Da un error
     (*nullVotes)++;       //Añade uno al contador de votos nulos
@@ -83,13 +85,10 @@ void Disqualify (tParticipantName name, int *nullVotes, tList *l) {     //Funcio
 
 void Stats (char *totalVoters, const tNumVotes *nullVotes, const tNumVotes *totalVotes, tList l) {
 
-  if (isEmptyList(l)) {         //Si la lista esta vacia no da un error
-
+  if (isEmptyList(l)) {         //Si la lista esta vacia da un error
     printf("+ Error: Stats not possible\n");
-
   } else {
-
-    float v_n;
+    float p_p;
     tPosL pos = first(l);
     tItemL item;
     int Voters = strtol(totalVoters, NULL, 10);
@@ -97,16 +96,17 @@ void Stats (char *totalVoters, const tNumVotes *nullVotes, const tNumVotes *tota
     while(pos != LNULL) {   //Va recorriendo toda la lista
       item = getItem (pos, l);      //Recupera los datos del participante
       if (item.numVotes == 0) {   //Si el participante no tiene votos
-        v_n = 0;            //Devuelve que el porcentaje de votos es 0
+        p_p = 0;            //Devuelve que el porcentaje de votos es 0.0%
       } else {          //Si tiene votos
-        v_n = (float) item.numVotes / (float) (*totalVotes - *nullVotes) * 100;   //Porcentaje de votos que tiene con respecto a los votos totales menos los votos nulos
+        p_p = (float) item.numVotes / (float) (*totalVotes - *nullVotes) * 100;   //Porcentaje de votos que tiene con respecto a los votos totales menos los votos nulos
       }
-      printf("Participant %s location %s numvotes %d (%.2f%%)\n", item.participantName, BoolToChar(item.EUParticipant), item.numVotes, v_n);
+      printf("Participant %s location %s numvotes %d (%.2f%%)\n", item.participantName, BoolToChar(item.EUParticipant), item.numVotes, p_p);
       pos = next(pos, l);       //Avanza una posicion de la lista para continuar el bucle
     }
+
     printf("Null votes %d\n", *nullVotes);      //Imprime por pantalla la cantidad de votos nulos
-    float p = (float)*totalVotes/(float)Voters * 100;       //Calcula el porcentaje de participacion de los jueces
-    printf("Participation: %d votes from %d voters (%.2f%%)\n", *totalVotes, Voters, p);    //Imprime por pantalla el porcentaje de participacion de los jueces
+    float p_v = (float)*totalVotes/(float)Voters * 100;       //Calcula el porcentaje de participacion de los jueces
+    printf("Participation: %d votes from %d voters (%.2f%%)\n", *totalVotes, Voters, p_v);    //Imprime por pantalla el porcentaje de participacion de los jueces
   }
 }
 
@@ -150,20 +150,20 @@ void readTasks(char *filename) {      //Lee el archivo para pasar los datos corr
   *total_votes = 0;
   *null_votes = 0;
 
-  f = fopen(filename, "r");
+  f = fopen(filename, "r");   //Abre el archivo
 
   if (f != NULL) {
 
-    while (fgets(buffer, MAX_BUFFER, f)) {
+    while (fgets(buffer, MAX_BUFFER, f)) {        //Bucle que sirve para conseguir lps parametros de processCommand
       commandNumber = strtok(buffer, delimiters);
       command = strtok(NULL, delimiters);
       param1 = strtok(NULL, delimiters);
       param2 = strtok(NULL, delimiters);
 
-      processCommand(commandNumber, command[0], param1, param2, null_votes, total_votes, &list);
+      processCommand(commandNumber, command[0], param1, param2, null_votes, total_votes, &list);    //Llamada a la funcion processCommand
     }
 
-    fclose(f);
+    fclose(f);        //Cierra el archivo
 
   } else {
     printf("Cannot open file %s.\n", filename);
