@@ -40,7 +40,8 @@ void New (tParticipantName countryname, char *euParticipant, tList *l) {  //Func
     participant.numVotes = 0;                             //Al crear un nuevo participante no tendra votos
 
     if (insertItem(participant, LNULL, l)) {              //Si da true al insertar el participante es que no hay errores
-      printf("* New: participant %s location %s\n", participant.participantName, BoolToChar(participant.EUParticipant));    //Entonces lo inserta
+      printf("* New: participant %s location %s\n",
+             participant.participantName, BoolToChar(participant.EUParticipant));    //Entonces lo inserta
     } else {                                              //Si insertItem da false
       printf("+ Error: New not possible\n");       //Da un error
     }
@@ -60,7 +61,8 @@ void Vote (tParticipantName participantName, int *nullVotes, int *totalVotes, tL
     tItemL participant;
     participant = getItem(pos, *l);     //Recuperamos el participante
     participant.numVotes ++;            //Y le sumamos un voto
-    printf("* Vote: participant %s location %s numvotes %d\n", participant.participantName, BoolToChar(participant.EUParticipant), participant.numVotes);
+    printf("* Vote: participant %s location %s numvotes %d\n",
+           participant.participantName, BoolToChar(participant.EUParticipant), participant.numVotes);
     (*totalVotes)++;          //Añade uno al contador de votos globales
     updateItem(participant, pos, l);      //Actualiza el valor en la lista
   }
@@ -75,7 +77,8 @@ void Disqualify (tParticipantName name, int *nullVotes, tList *l) {     //Funcio
   } else {                                    //Si encontro al participante
     tItemL participant;
     participant = getItem(pos, *l);           //Recupera los datos del participante de la lista
-    printf("* Disqualify: participant %s location %s\n", participant.participantName, BoolToChar(participant.EUParticipant));
+    printf("* Disqualify: participant %s location %s\n",
+           participant.participantName, BoolToChar(participant.EUParticipant));
     for (int i = 0; i < participant.numVotes; i++) {
       (*nullVotes)++;       //Aumenta el contador de votos nulos en funcion de todos los votos que tenga el participante
     }
@@ -91,7 +94,7 @@ void Stats (char *totalVoters, const tNumVotes *nullVotes, const tNumVotes *tota
     float p_p;
     tPosL pos = first(l);
     tItemL item;
-    int Voters = strtol(totalVoters, NULL, 10);
+    tNumVotes Voters = strtol(totalVoters, NULL, 10);
 
     while(pos != LNULL) {   //Va recorriendo toda la lista
       item = getItem (pos, l);      //Recupera los datos del participante
@@ -100,7 +103,8 @@ void Stats (char *totalVoters, const tNumVotes *nullVotes, const tNumVotes *tota
       } else {          //Si tiene votos
         p_p = (float) item.numVotes / (float) (*totalVotes - *nullVotes) * 100;   //Porcentaje de votos que tiene con respecto a los votos totales menos los votos nulos
       }
-      printf("Participant %s location %s numvotes %d (%.2f%%)\n", item.participantName, BoolToChar(item.EUParticipant), item.numVotes, p_p);
+      printf("Participant %s location %s numvotes %d (%.2f%%)\n",
+             item.participantName, BoolToChar(item.EUParticipant), item.numVotes, p_p);
       pos = next(pos, l);       //Avanza una posicion de la lista para continuar el bucle
     }
 
@@ -110,7 +114,8 @@ void Stats (char *totalVoters, const tNumVotes *nullVotes, const tNumVotes *tota
   }
 }
 
-void processCommand(char *commandNumber, char command, char *param1, char *param2, tNumVotes *nullVotes, tNumVotes *totalVotes, tList *l) {   //Funcion que procesa que comando debe ejecutar el programa
+void processCommand(char *commandNumber, char command, char *param1, char *param2,
+                    tNumVotes *nullVotes, tNumVotes *totalVotes, tList *l) {   //Funcion que procesa que comando debe ejecutar el programa
 
   printf("********************\n");     //Imprime 20 asteriscos
 
@@ -173,7 +178,7 @@ void readTasks(char *filename) {      //Lee el archivo para pasar los datos corr
 
 int main(int nargs, char **args) {
 
-  char *file_name = "new.txt";      //Archivo que abre por defecto
+  char *file_name = "disqualify2.txt";      //Archivo que abre por defecto
 
   if (nargs > 1) {
     file_name = args[1];
