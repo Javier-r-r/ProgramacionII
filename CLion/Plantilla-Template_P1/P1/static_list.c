@@ -11,7 +11,7 @@
 #include "static_list.h"
 
 
-void createEmptyList(tList * L){
+void createEmptyList(tList *L){
   L -> lastPos = LNULL;
 }
 

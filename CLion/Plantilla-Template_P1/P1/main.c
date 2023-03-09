@@ -21,30 +21,6 @@
 #include "static_list.h"
 #endif
 
-tNumVotes nullVotes = 0;
-tNumVotes totalVotes = 0;
-
-void AddVote () {
-  totalVotes ++;
-}
-
-void AddNullVote () {
-  nullVotes ++;
-  AddVote();
-}
-
-void RemVotes () {
-  totalVotes --;
-}
-
-tNumVotes GetNullVotes () {
-  return nullVotes;
-}
-
-tNumVotes GetVotes () {
-  return totalVotes;
-}
-
 char *BoolToChar (tEUParticipant eu) {
   if(eu) {
     return "eu";
@@ -69,23 +45,24 @@ void New (tParticipantName countryname, char *euParticipant, tList *l) {
   }
 }
 
-void Vote (tParticipantName participantName, tList *l) {
+void Vote (tParticipantName participantName, int *nullVotes, int *totalVotes, tList *l) {
   tItemL participant;
   tPosL pos;
   pos = findItem(participantName, *l);
   participant = getItem(pos, *l);
-  if (findItem(participantName, *l) == LNULL || isEmptyList(*l)) {
+  if (isEmptyList(*l) || findItem(participantName, *l) == LNULL) {
     printf("+ Error: Vote not possible. Participant %s not found. NULLVOTE\n", participant.participantName);
-    AddNullVote();
+    (*nullVotes)++;
+    (*totalVotes)++;
   } else {
     participant.numVotes ++;
     printf("* Vote: participant %s location %s numvotes %d\n", participant.participantName, BoolToChar(participant.EUParticipant), participant.numVotes);
-    AddVote();
+    (*totalVotes)++;
     updateItem(participant, pos, l);
   }
 }
 
-void Disqualify (tParticipantName name, tList *l) {
+void Disqualify (tParticipantName name, int *nullVotes, tList *l) {
   tPosL pos = findItem(name, *l);
   tItemL participant;
   if (isEmptyList(*l) || pos == LNULL) {
@@ -94,18 +71,16 @@ void Disqualify (tParticipantName name, tList *l) {
     participant = getItem(pos, *l);
     printf("* Disqualify: participant %s location %s\n", participant.participantName, BoolToChar(participant.EUParticipant));
     for (int i = 0; i < participant.numVotes; i++) {
-      AddNullVote();
-      RemVotes();
+      (*nullVotes)++;
     }
     deleteAtPosition(pos, l);
   }
 }
 
-void Stats (char *totalVoters, tList l) {
+void Stats (char *totalVoters, tNumVotes *nullVotes, tNumVotes *totalVotes, tList l) {
   float v_n;
   tPosL pos;
   tItemL item;
-  tNumVotes votes = GetVotes();
   int Voters = strtol(totalVoters, NULL, 10);
 
   if (isEmptyList(l)) {
@@ -117,19 +92,19 @@ void Stats (char *totalVoters, tList l) {
       if (item.numVotes == 0) {
         v_n = 0;
       } else {
-        v_n = (float) item.numVotes / (float) votes * 100;
+        v_n = (float) item.numVotes / (float) *totalVotes * 100;
       }
       printf("Participant %s location %s numvotes %d (%.2f%%)\n", item.participantName, BoolToChar(item.EUParticipant), item.numVotes, v_n);
       pos = next(pos, l);
     }
-    printf("Null votes %d\n", GetNullVotes());
-    float p = (float)votes/(float)Voters * 100;
-    printf("Participation: %d votes from %d voters (%.2f%%)\n", votes, Voters, p);
+    printf("Null votes %d\n", *nullVotes);
+    float p = (float)*totalVotes/(float)Voters * 100;
+    printf("Participation: %d votes from %d voters (%.2f%%)\n", *totalVotes, Voters, p);
   }
 
 }
 
-void processCommand(char *commandNumber, char command, char *param1, char *param2, tList *l) {
+void processCommand(char *commandNumber, char command, char *param1, char *param2, int *nullVotes, int *totalVotes, tList *l) {
   printf("********************\n");
   switch (command) {
     case 'N':                 //realiza new
@@ -138,26 +113,33 @@ void processCommand(char *commandNumber, char command, char *param1, char *param
       break;
     case 'V':                 //realiza vote
       printf("%s %c: participant %s\n", commandNumber, command, param1);
-      Vote(param1, l);
+      Vote(param1, nullVotes, totalVotes, l);
       break;
     case 'D':                 //realiza disqualify
       printf("%s %c: participant %s\n", commandNumber, command, param1);
-      Disqualify(param1, l);
+      Disqualify(param1, nullVotes, l);
       break;
-    case 'S':
+    case 'S':                 //realiza stats
       printf("%s %c: totalvoters %s\n", commandNumber, command, param1);
-      Stats(param1, *l);
+      Stats(param1, nullVotes, totalVotes, *l);
       break;
     default:
       break;
     }
 }
 
-void readTasks(char *filename, tList *l) {
+void readTasks(char *filename) {
   FILE *f = NULL;
   char *commandNumber, *command, *param1, *param2;
   const char delimiters[] = " \n\r";
   char buffer[MAX_BUFFER];
+  tNumVotes *valid_votes = malloc(sizeof(tNumVotes));
+  tNumVotes *null_votes = malloc(sizeof(tNumVotes));
+  *valid_votes = 0;
+  *null_votes = 0;
+  tList list;
+  createEmptyList(&list);
+
 
   f = fopen(filename, "r");
 
@@ -169,7 +151,7 @@ void readTasks(char *filename, tList *l) {
       param1 = strtok(NULL, delimiters);
       param2 = strtok(NULL, delimiters);
 
-      processCommand(commandNumber, command[0], param1, param2, l);
+      processCommand(commandNumber, command[0], param1, param2, null_votes, valid_votes, &list);
     }
 
     fclose(f);
@@ -192,10 +174,7 @@ int main(int nargs, char **args) {
     #endif
   }
 
-  tList list;
-  createEmptyList(&list);
-
-  readTasks(file_name, &list);
+  readTasks(file_name);
 
   return 0;
 }

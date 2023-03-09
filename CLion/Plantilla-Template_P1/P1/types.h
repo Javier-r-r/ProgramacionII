@@ -15,4 +15,9 @@ typedef struct tItemL {
     tEUParticipant EUParticipant;
 } tItemL;
 
+typedef struct tCounter {
+  tNumVotes valid_votes;
+  tNumVotes null_votes;
+} tCounter;
+
 #endif //PRO2_2023_P1_TYPES_H
