@@ -77,7 +77,7 @@ void Disqualify (tParticipantName name, int *nullVotes, tList *l) {
   }
 }
 
-void Stats (char *totalVoters, tNumVotes *nullVotes, tNumVotes *totalVotes, tList l) {
+void Stats (char *totalVoters, const tNumVotes *nullVotes, const tNumVotes *totalVotes, tList l) {
   float v_n;
   tPosL pos;
   tItemL item;
