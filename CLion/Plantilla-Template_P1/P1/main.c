@@ -79,9 +79,7 @@ void Disqualify (tParticipantName name, int *nullVotes, tList *l) {     //Funcio
     participant = getItem(pos, *l);           //Recupera los datos del participante de la lista
     printf("* Disqualify: participant %s location %s\n",
            participant.participantName, BoolToChar(participant.EUParticipant));
-    for (int i = 0; i < participant.numVotes; i++) {
-      (*nullVotes)++;       //Aumenta el contador de votos nulos en funcion de todos los votos que tenga el participante
-    }
+    *nullVotes = *nullVotes + participant.numVotes;     //Aumenta el contador de votos nulos en funcion de todos los votos que tenga el participante
     deleteAtPosition(pos, l);     //Y elimina al participante
   }
 }
