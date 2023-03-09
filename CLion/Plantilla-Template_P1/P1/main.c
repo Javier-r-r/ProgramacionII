@@ -49,12 +49,12 @@ void Vote (tParticipantName participantName, int *nullVotes, int *totalVotes, tL
   tItemL participant;
   tPosL pos;
   pos = findItem(participantName, *l);
-  participant = getItem(pos, *l);
   if (isEmptyList(*l) || findItem(participantName, *l) == LNULL) {
-    printf("+ Error: Vote not possible. Participant %s not found. NULLVOTE\n", participant.participantName);
+    printf("+ Error: Vote not possible. Participant %s not found. NULLVOTE\n", participantName);
     (*nullVotes)++;
     (*totalVotes)++;
   } else {
+    participant = getItem(pos, *l);
     participant.numVotes ++;
     printf("* Vote: participant %s location %s numvotes %d\n", participant.participantName, BoolToChar(participant.EUParticipant), participant.numVotes);
     (*totalVotes)++;
@@ -92,7 +92,7 @@ void Stats (char *totalVoters, tNumVotes *nullVotes, tNumVotes *totalVotes, tLis
       if (item.numVotes == 0) {
         v_n = 0;
       } else {
-        v_n = (float) item.numVotes / (float) *totalVotes * 100;
+        v_n = (float) item.numVotes / (float) (*totalVotes - *nullVotes) * 100;
       }
       printf("Participant %s location %s numvotes %d (%.2f%%)\n", item.participantName, BoolToChar(item.EUParticipant), item.numVotes, v_n);
       pos = next(pos, l);
