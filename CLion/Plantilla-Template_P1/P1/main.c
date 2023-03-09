@@ -21,7 +21,7 @@
 #include "static_list.h"
 #endif
 
-char *BoolToChar (tEUParticipant eu) {
+char *BoolToChar (tEUParticipant eu) {  //Funcion que pasa un valor de tipo tEUParticipant a el char correspondiente
   if(eu) {
     return "eu";
   } else {
@@ -29,83 +29,91 @@ char *BoolToChar (tEUParticipant eu) {
   }
 }
 
-void New (tParticipantName countryname, char *euParticipant, tList *l) {
-  tItemL participant;
-  if (findItem(countryname, *l) != LNULL) {
-    printf("+ Error: New not possible\n");
-  } else {
-    strcpy(participant.participantName, countryname);
+void New (tParticipantName countryname, char *euParticipant, tList *l) {  //Funcion para añadir un nuevo participante
+
+  if (findItem(countryname, *l) != LNULL) {          //Comprueba que no esté el nombre del participante en la lista
+    printf("+ Error: New not possible\n");    //Si esta da un error
+  } else {                                           // Si no esta se añade
+    tItemL participant;
+    strcpy(participant.participantName, countryname);     //Se le asignan los parametros correspondientes
     participant.EUParticipant = !strcmp(euParticipant, "eu"); //Pasa de char a booleano
-    participant.numVotes = 0;
-    if (insertItem(participant, LNULL, l)) {
-      printf("* New: participant %s location %s\n", participant.participantName, BoolToChar(participant.EUParticipant));
-    } else {
-      printf("+ Error: New not possible\n");
+    participant.numVotes = 0;                             //Al crear un nuevo participante no tendra votos
+    if (insertItem(participant, LNULL, l)) {              //Si da true al insertar el participante es que no hay errores
+      printf("* New: participant %s location %s\n", participant.participantName, BoolToChar(participant.EUParticipant));    //Entonces lo inserta
+    } else {                                              //Si insertItem da false
+      printf("+ Error: New not possible\n");       //Da un error
     }
   }
 }
 
-void Vote (tParticipantName participantName, int *nullVotes, int *totalVotes, tList *l) {
-  tItemL participant;
+void Vote (tParticipantName participantName, int *nullVotes, int *totalVotes, tList *l) {//Funcion que añade un voto a los participantes
+
   tPosL pos;
-  pos = findItem(participantName, *l);
-  if (isEmptyList(*l) || findItem(participantName, *l) == LNULL) {
-    printf("+ Error: Vote not possible. Participant %s not found. NULLVOTE\n", participantName);
-    (*nullVotes)++;
-    (*totalVotes)++;
-  } else {
-    participant = getItem(pos, *l);
-    participant.numVotes ++;
+  pos = findItem(participantName, *l);                      //Encontramos la posicion del participante en la lista
+  if (isEmptyList(*l) || pos == LNULL) {//Si la lista esta vacia o no encuentra al participante
+    printf("+ Error: Vote not possible. Participant %s not found. NULLVOTE\n", participantName);  //Da un error
+    (*nullVotes)++;       //Añade uno al contador de votos nulos
+    (*totalVotes)++;      //Y otro al contador de votos totales
+  } else {                  //Si encontro el participante
+    tItemL participant;
+    participant = getItem(pos, *l);     //Recuperamos el participante
+    participant.numVotes ++;            //Y le sumamos un voto
     printf("* Vote: participant %s location %s numvotes %d\n", participant.participantName, BoolToChar(participant.EUParticipant), participant.numVotes);
-    (*totalVotes)++;
-    updateItem(participant, pos, l);
+    (*totalVotes)++;          //Añade uno al contador de votos globales
+    updateItem(participant, pos, l);      //Actualiza el valor en la lista
   }
 }
 
-void Disqualify (tParticipantName name, int *nullVotes, tList *l) {
+void Disqualify (tParticipantName name, int *nullVotes, tList *l) {     //Funcion que descalifica a un participante
+
   tPosL pos = findItem(name, *l);
-  tItemL participant;
-  if (isEmptyList(*l) || pos == LNULL) {
-    printf("+ Error: Disqualify not possible\n");
-  } else {
-    participant = getItem(pos, *l);
+
+  if (isEmptyList(*l) || pos == LNULL) {      //Si la lista esta vacia o no encuentra el nombre del participante
+    printf("+ Error: Disqualify not possible\n");     //Da un error
+  } else {                                    //Si encontro al participante
+    tItemL participant;
+    participant = getItem(pos, *l);           //Recupera los datos del participante de la lista
     printf("* Disqualify: participant %s location %s\n", participant.participantName, BoolToChar(participant.EUParticipant));
     for (int i = 0; i < participant.numVotes; i++) {
-      (*nullVotes)++;
+      (*nullVotes)++;       //Aumenta el contador de votos nulos en funcion de todos los votos que tenga el participante
     }
-    deleteAtPosition(pos, l);
+    deleteAtPosition(pos, l);     //Y elimina al participante
   }
 }
 
 void Stats (char *totalVoters, const tNumVotes *nullVotes, const tNumVotes *totalVotes, tList l) {
-  float v_n;
-  tPosL pos;
-  tItemL item;
-  int Voters = strtol(totalVoters, NULL, 10);
 
-  if (isEmptyList(l)) {
+  if (isEmptyList(l)) {         //Si la lista esta vacia no da un error
+
     printf("+ Error: Stats not possible\n");
+
   } else {
-    pos = first(l);
-    while(pos != LNULL) {
-      item = getItem (pos, l);
-      if (item.numVotes == 0) {
-        v_n = 0;
-      } else {
-        v_n = (float) item.numVotes / (float) (*totalVotes - *nullVotes) * 100;
+
+    float v_n;
+    tPosL pos = first(l);
+    tItemL item;
+    int Voters = strtol(totalVoters, NULL, 10);
+
+    while(pos != LNULL) {   //Va recorriendo toda la lista
+      item = getItem (pos, l);      //Recupera los datos del participante
+      if (item.numVotes == 0) {   //Si el participante no tiene votos
+        v_n = 0;            //Devuelve que el porcentaje de votos es 0
+      } else {          //Si tiene votos
+        v_n = (float) item.numVotes / (float) (*totalVotes - *nullVotes) * 100;   //Porcentaje de votos que tiene con respecto a los votos totales menos los votos nulos
       }
       printf("Participant %s location %s numvotes %d (%.2f%%)\n", item.participantName, BoolToChar(item.EUParticipant), item.numVotes, v_n);
-      pos = next(pos, l);
+      pos = next(pos, l);       //Avanza una posicion de la lista para continuar el bucle
     }
-    printf("Null votes %d\n", *nullVotes);
-    float p = (float)*totalVotes/(float)Voters * 100;
-    printf("Participation: %d votes from %d voters (%.2f%%)\n", *totalVotes, Voters, p);
+    printf("Null votes %d\n", *nullVotes);      //Imprime por pantalla la cantidad de votos nulos
+    float p = (float)*totalVotes/(float)Voters * 100;       //Calcula el porcentaje de participacion de los jueces
+    printf("Participation: %d votes from %d voters (%.2f%%)\n", *totalVotes, Voters, p);    //Imprime por pantalla el porcentaje de participacion de los jueces
   }
-
 }
 
-void processCommand(char *commandNumber, char command, char *param1, char *param2, int *nullVotes, int *totalVotes, tList *l) {
-  printf("********************\n");
+void processCommand(char *commandNumber, char command, char *param1, char *param2, tNumVotes *nullVotes, tNumVotes *totalVotes, tList *l) {   //Funcion que procesa que comando debe ejecutar el programa
+
+  printf("********************\n");     //Imprime 20 asteriscos
+
   switch (command) {
     case 'N':                 //realiza new
       printf("%s %c: participant %s location %s\n", commandNumber, command, param1, param2);
@@ -128,18 +136,19 @@ void processCommand(char *commandNumber, char command, char *param1, char *param
     }
 }
 
-void readTasks(char *filename) {
+void readTasks(char *filename) {      //Lee el archivo para pasar los datos correspondientes a la funcion processCommand
+
   FILE *f = NULL;
   char *commandNumber, *command, *param1, *param2;
   const char delimiters[] = " \n\r";
   char buffer[MAX_BUFFER];
-  tNumVotes *valid_votes = malloc(sizeof(tNumVotes));
-  tNumVotes *null_votes = malloc(sizeof(tNumVotes));
-  *valid_votes = 0;
-  *null_votes = 0;
   tList list;
   createEmptyList(&list);
 
+  tNumVotes *total_votes = malloc(sizeof(tNumVotes));     //Puntero del contador de votos totales
+  tNumVotes *null_votes = malloc(sizeof(tNumVotes));      //Puntero del contador de los votos nulos
+  *total_votes = 0;
+  *null_votes = 0;
 
   f = fopen(filename, "r");
 
@@ -151,7 +160,7 @@ void readTasks(char *filename) {
       param1 = strtok(NULL, delimiters);
       param2 = strtok(NULL, delimiters);
 
-      processCommand(commandNumber, command[0], param1, param2, null_votes, valid_votes, &list);
+      processCommand(commandNumber, command[0], param1, param2, null_votes, total_votes, &list);
     }
 
     fclose(f);
@@ -164,7 +173,7 @@ void readTasks(char *filename) {
 
 int main(int nargs, char **args) {
 
-  char *file_name = "new.txt";
+  char *file_name = "new.txt";      //Archivo que abre por defecto
 
   if (nargs > 1) {
     file_name = args[1];
@@ -174,7 +183,7 @@ int main(int nargs, char **args) {
     #endif
   }
 
-  readTasks(file_name);
+  readTasks(file_name);   //Le pasa el archivo correspondiente a readTasks
 
   return 0;
 }
