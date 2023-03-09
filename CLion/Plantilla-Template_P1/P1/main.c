@@ -4,7 +4,7 @@
  * AUTHOR 1: Javier Rodriguez Rodriguez LOGIN 1: j.rrodriguez1@udc.es
  * AUTHOR 2: Ruben Iglesias Seoane LOGIN 2: r.seoane.iglesias@udc.es
  * GROUP: 3.4
- * DATE: 09 / 03 / 23
+ * DATE: 16 / 03 / 23
  */
 
 #include <stdio.h>
