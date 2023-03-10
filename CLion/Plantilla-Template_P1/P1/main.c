@@ -21,7 +21,7 @@
 #include "static_list.h"
 #endif
 
-char *BoolToChar (tEUParticipant eu) {  //Funcion que pasa un valor de tipo tEUParticipant a el char correspondiente
+char *BoolToChar (tEUParticipant eu) {        //El objetivo de esta funcion es pasar un dato de tipo tEUParticipant a un tipo char*
   if (eu) {
     return "eu";
   } else {
@@ -29,8 +29,8 @@ char *BoolToChar (tEUParticipant eu) {  //Funcion que pasa un valor de tipo tEUP
   }
 }
 
-void New (tParticipantName countryname, char *euParticipant, tList *l) {  //Funcion para añadir un nuevo participante
-
+void New (tParticipantName countryname, char *euParticipant, tList *l) {  //El objetivo de esta funcion es modificar la lista
+                                                                          //dada añadiendo un nuevo participante
   if (findItem(countryname, *l) != LNULL) {          //Comprueba que no esté el nombre del participante en la lista
     printf("+ Error: New not possible\n");    //Si esta da un error
   } else {                                           // Si no esta se añade
@@ -48,7 +48,7 @@ void New (tParticipantName countryname, char *euParticipant, tList *l) {  //Func
   }
 }
 
-void Vote (tParticipantName participantName, int *nullVotes, int *totalVotes, tList *l) {//Funcion que añade un voto a los participantes
+void Vote (tParticipantName participantName, int *nullVotes, int *totalVotes, tList *l) {//Funcion que añade un voto al participante indicado
 
   tPosL pos;
   pos = findItem(participantName, *l);                      //Encontramos la posicion del participante en la lista
@@ -68,7 +68,7 @@ void Vote (tParticipantName participantName, int *nullVotes, int *totalVotes, tL
   }
 }
 
-void Disqualify (tParticipantName name, int *nullVotes, tList *l) {     //Funcion que descalifica a un participante
+void Disqualify (tParticipantName name, int *nullVotes, tList *l) {     //Funcion que descalifica al participante indicado
 
   tPosL pos = findItem(name, *l);
 
@@ -84,15 +84,15 @@ void Disqualify (tParticipantName name, int *nullVotes, tList *l) {     //Funcio
   }
 }
 
-void Stats (char *totalVoters, const tNumVotes *nullVotes, const tNumVotes *totalVotes, tList l) {
+void Stats (char *totalVoters, const tNumVotes *nullVotes, const tNumVotes *totalVotes, tList l) {    //Funcion que imprime por pantalla los stats de los participantes que estan en la lista
 
   if (isEmptyList(l)) {         //Si la lista esta vacia da un error
     printf("+ Error: Stats not possible\n");
   } else {
-    float p_p;
+    float p_p, p_v;
     tPosL pos = first(l);
     tItemL item;
-    tNumVotes Voters = strtol(totalVoters, NULL, 10);
+    tNumVotes Voters = strtol(totalVoters, NULL, 10);   //Pasa el dato de char* a int para enseñarlo por pantalla mas adelante
 
     while(pos != LNULL) {   //Va recorriendo toda la lista
       item = getItem (pos, l);      //Recupera los datos del participante
@@ -107,7 +107,7 @@ void Stats (char *totalVoters, const tNumVotes *nullVotes, const tNumVotes *tota
     }
 
     printf("Null votes %d\n", *nullVotes);      //Imprime por pantalla la cantidad de votos nulos
-    float p_v = (float)*totalVotes/(float)Voters * 100;       //Calcula el porcentaje de participacion de los jueces
+    p_v = (float)*totalVotes/(float)Voters * 100;       //Calcula el porcentaje de participacion de los jueces
     printf("Participation: %d votes from %d voters (%.2f%%)\n", *totalVotes, Voters, p_v);    //Imprime por pantalla el porcentaje de participacion de los jueces
   }
 }
