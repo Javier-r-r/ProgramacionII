@@ -41,6 +41,7 @@ tPosL next( tPosL p, tList L){          //Objetivo: Devolver la posición en la 
 
 
 tPosL previous(tPosL p, tList L){       //Objetivo: Devolver la posición en la lista del elemento anterior al de la posición indicada
+  tPosL q;
   if(p == first(L)){                    //Entrada: Posición de la que se quiere saber la anterior, Lista correspondiente
     return LNULL;                       //Salida: Posición anterior (o LNULL si la posición no tiene anterior)
   }else{                                //PreCD: La posición indicada es una posición válida en la lista
@@ -51,6 +52,7 @@ tPosL previous(tPosL p, tList L){       //Objetivo: Devolver la posición en la 
 }
 
 bool insertItem(tItemL d,tPosL p,tList* L){     //Objetivo: Insertar un elemento en la lista antes de la posición indicada. Si la posición es LNULL, entonces se añade al final.
+  tPosL q, r;
   if (!createNode(&q))                          //Entrada: El participante a insertar, Posición en la que se quiere insertar al participante, Lista en la que se va a insertar al participante
     return false;                               //Salida: La lista modificada, True si se pudo insertar el participante, False en caso contrario
   else {                                        //PreCD: La posición indicada es una posición válida en la lista o bien nula (LNULL)
