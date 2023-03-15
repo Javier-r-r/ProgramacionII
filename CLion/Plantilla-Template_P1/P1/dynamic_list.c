@@ -48,7 +48,6 @@ tPosL previous(tPosL p, tList L){       //Objetivo: Devolver la posición en la 
     for(q = first(L); q -> next != p; q = next(q,L));
     return q;
   }
-  tPosL q;
 }
 
 bool insertItem(tItemL d,tPosL p,tList* L){     //Objetivo: Insertar un elemento en la lista antes de la posición indicada. Si la posición es LNULL, entonces se añade al final.
@@ -76,7 +75,6 @@ bool insertItem(tItemL d,tPosL p,tList* L){     //Objetivo: Insertar un elemento
     }
     return true;
   }
-  tPosL q,r;
 }
 
 void deleteAtPosition(tPosL p, tList *L){       //Objetivo: Eliminar de la lista el elemento que ocupa la posición indicada
